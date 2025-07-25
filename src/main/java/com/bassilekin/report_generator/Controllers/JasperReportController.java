@@ -28,11 +28,9 @@ public class JasperReportController {
 
     /**
      * Affiche le formulaire de génération de rapport.
-     * Pré-remplit le formulaire avec des données d'exemple ou un objet Invoice vide.
      */
     @GetMapping("/generate-report-form") // Endpoint pour afficher le formulaire
     public String showReportForm(Model model) {
-        // Pré-remplir l'objet Invoice avec des données d'exemple
         Invoice defaultInvoice = new Invoice();
         
         // Ajouter des items par défaut si désiré
