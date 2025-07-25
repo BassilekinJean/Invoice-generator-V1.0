@@ -40,7 +40,7 @@ public class JasperReportController {
         defaultInvoice.setItems(defaultItems);
 
         model.addAttribute("invoice", defaultInvoice); // Le nom de l'attribut doit correspondre à th:object
-        return "reportForm"; // Ceci correspondra à src/main/resources/templates/reportForm.html
+        return "index"; // Ceci correspondra à src/main/resources/templates/reportForm.html
     }
 
     /**
