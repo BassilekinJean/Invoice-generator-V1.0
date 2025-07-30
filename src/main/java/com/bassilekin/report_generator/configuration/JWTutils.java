@@ -68,9 +68,9 @@ public class JWTutils {
 
     // --- LOGIQUE DE BLACKLISTING AVEC REDIS ---
     public Boolean isTokenInvalidated(String token) {
-        // if (token == null || token.trim().isEmpty()) {
-        //     return true; 
-        // }
+        if (token == null || token.trim().isEmpty()) {
+             return true; 
+        }
         return redisTemplate.hasKey(token);
     }
     /**
