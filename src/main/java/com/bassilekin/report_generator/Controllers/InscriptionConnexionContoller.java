@@ -57,7 +57,7 @@ public class InscriptionConnexionContoller {
     public ResponseEntity<?> incriptionsUser(@Valid @RequestBody UserRegistrationDto registrationDto) {
 
         try {
-            // --- Apply Rate Limiting for Registration ---
+            // --- Appliquer le Rate Limiting for Registration ---
             registerRateLimiter.acquirePermission(); 
 
             if (!registrationDto.userPassword().equals(registrationDto.confirmPassword())) {
@@ -139,6 +139,46 @@ public class InscriptionConnexionContoller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur inattendue est survenue.");
         }
     }    
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        String authHeader = request.getHeader("Authorization");
+        String accessToken = null;
+
+        // 1. Blacklister l'access token actuel si présent
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            accessToken = authHeader.substring(7);
+            jwtUtils.invalidateToken(accessToken); 
+            log.info("Access Token invalidé et ajouté à la blacklist pour déconnexion.");
+        }
+
+        // 2. Supprimer le refresh token du cookie
+        String refreshTokenFromCookie = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("refreshToken")) {
+                    refreshTokenFromCookie = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        if (refreshTokenFromCookie != null) {
+            jwtUtils.invalidateToken(refreshTokenFromCookie); 
+            log.info("Refresh Token invalidé et ajouté à la blacklist pour déconnexion.");
+        }
+
+        // 3. Écraser le cookie du refresh token pour le supprimer du navigateur
+        Cookie deleteRefreshTokenCookie = new Cookie("refreshToken", null); 
+        deleteRefreshTokenCookie.setHttpOnly(true);
+        deleteRefreshTokenCookie.setSecure(true); 
+        deleteRefreshTokenCookie.setPath("/auth/refresh"); 
+        deleteRefreshTokenCookie.setMaxAge(0); 
+        response.addCookie(deleteRefreshTokenCookie); 
+
+        log.info("Déconnexion réussie. Jeton(s) invalidé(s) et cookie supprimé.");
+        return ResponseEntity.ok("Déconnexion réussie.");
+    }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {

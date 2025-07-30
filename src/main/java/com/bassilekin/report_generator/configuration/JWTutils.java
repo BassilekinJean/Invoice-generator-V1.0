@@ -1,14 +1,14 @@
 package com.bassilekin.report_generator.configuration;
 
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -16,14 +16,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
-//import lombok.RequiredArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 
 @Component
 @Getter
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 public class JWTutils {
 
+    @Value("${jwt.secret-key}")
     private String secretKey;
 
     @Value("${jwt.access-token-expiration}") 
@@ -32,17 +33,7 @@ public class JWTutils {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
-    //private final RedisTemplate<String, Object> redisTemplate;
-
-    public JWTutils() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey sk = keyGen.generateKey();
-            this.secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
-        } catch (Exception e) {
-            throw new RuntimeException("Error generating secret key for JWT", e);
-        }
-    }
+    private final RedisTemplate<String, Object> redisTemplate;
     
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
@@ -74,6 +65,27 @@ public class JWTutils {
         final String extractedUsername = extractUsername(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
+
+    // --- LOGIQUE DE BLACKLISTING AVEC REDIS ---
+    public Boolean isTokenInvalidated(String token) {
+        // if (token == null || token.trim().isEmpty()) {
+        //     return true; 
+        // }
+        return redisTemplate.hasKey(token);
+    }
+    /**
+     * Invalide un token en le stockant dans Redis avec sa durée de vie restante.
+     * Cela permet de s'assurer que le token ne sera plus valide avant son expiration naturelle.
+     */
+    public void invalidateToken(String token) {
+        Date expiration = extractExpiration(token);
+        long timeLeft = expiration.getTime() - System.currentTimeMillis(); 
+
+        if (timeLeft > 0) {
+            redisTemplate.opsForValue().set(token, true, timeLeft, TimeUnit.MILLISECONDS);
+        }
+    }
+    // ------------------------------------------
 
     public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());

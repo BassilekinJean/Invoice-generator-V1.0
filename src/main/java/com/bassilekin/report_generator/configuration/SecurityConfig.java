@@ -11,6 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import com.bassilekin.report_generator.Filtre.JwtFilter;
 import com.bassilekin.report_generator.Services.CustomUserDetailService;
@@ -27,7 +30,18 @@ public class SecurityConfig {
 
     @Bean
     public JwtFilter jwtFilter() {
-        return new JwtFilter(jwtUtils, customUserDetailService);
+        return new JwtFilter(jwtUtils, customUserDetailService, publicEndpointsMatcher());
+    }
+
+    @Bean
+    public RequestMatcher publicEndpointsMatcher() {
+        return new OrRequestMatcher(
+            new AntPathRequestMatcher("/auth/**"),
+            new AntPathRequestMatcher("/api/v1/auth/**"), 
+            new AntPathRequestMatcher("/h2-console/**"),
+            new AntPathRequestMatcher("/error"),
+            new AntPathRequestMatcher("/actuator/health")
+        );
     }
 
     @Bean
@@ -35,13 +49,10 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/auth/**").permitAll() 
-                    .requestMatchers("/h2-console/**").permitAll() 
-                    .requestMatchers("/error").permitAll() 
-                    .requestMatchers("/actuator/health").permitAll()
+                    .requestMatchers(publicEndpointsMatcher()).permitAll() 
                     .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtFilter(jwtUtils, customUserDetailService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Pour H2 console
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
