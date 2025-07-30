@@ -4,6 +4,9 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -42,4 +45,11 @@ public class User {
     private String userPassword;
 
     private String role;
+
+    @Column(nullable = false)
+    private int failedAttempt = 0;
+
+    private LocalDateTime lockTime;
+
+    private boolean accountLocked = false; 
 }
