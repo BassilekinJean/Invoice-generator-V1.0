@@ -34,6 +34,7 @@ public class JwtFilter extends OncePerRequestFilter{
                                             @NonNull FilterChain filterChain)
         throws ServletException, IOException {
 
+        // Si l'URL est publique, on passe au filtre suivant sans authentification
         if (publicEndpointsMatcher.matches(request)) {
             filterChain.doFilter(request, response); 
             return; 
@@ -41,20 +42,18 @@ public class JwtFilter extends OncePerRequestFilter{
 
         final String authHeader = request.getHeader("Authorization");
         String token = null;
-        String username = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            if (token != null && !token.isEmpty()) {
-                username = jwTutils.extractUsername(token);
-            }
         }
 
         if (token == null || token.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
-            response.getWriter().write("Jeton d'authentification manquant ou invalide.");
+            filterChain.doFilter(request, response);
             return;
         }
+
+        String username = jwTutils.extractUsername(token);
+
 
         if (jwTutils.isTokenInvalidated(token)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 

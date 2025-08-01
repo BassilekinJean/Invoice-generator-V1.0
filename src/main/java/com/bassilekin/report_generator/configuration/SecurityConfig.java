@@ -17,6 +17,7 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import com.bassilekin.report_generator.Filtre.JwtFilter;
+import com.bassilekin.report_generator.Security.CustomAuthenticationEntryPoint;
 import com.bassilekin.report_generator.Services.CustomUserDetailService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CustomUserDetailService customUserDetailService;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final JWTutils jwtUtils;
 
     @Bean
@@ -43,7 +45,10 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/**.html"),
             new AntPathRequestMatcher("/login.html"), 
             new AntPathRequestMatcher("/h2-console/**"),
-            new AntPathRequestMatcher("/error"),
+            new AntPathRequestMatcher("/error.html**"),
+            new AntPathRequestMatcher("/api/v1/error.html**"),
+            new AntPathRequestMatcher("/error**"),
+            new AntPathRequestMatcher("/api/v1/error**"),
             new AntPathRequestMatcher("/actuator/health")
         );
     }
@@ -55,6 +60,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(publicEndpointsMatcher()).permitAll() 
                     .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                .authenticationEntryPoint(authenticationEntryPoint)
                 )
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Pour H2 console

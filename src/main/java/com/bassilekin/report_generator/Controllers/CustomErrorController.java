@@ -1,51 +1,60 @@
 package com.bassilekin.report_generator.Controllers;
 
-import org.springframework.boot.web.servlet.error.ErrorController;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @Controller
-public class CustomErrorController implements ErrorController{
-    @RequestMapping("/error")
-    public String handleError(HttpServletRequest request, Model model) {
-        Object status = request.getAttribute(jakarta.servlet.RequestDispatcher.ERROR_STATUS_CODE);
-        String errorMessage = "Une erreur inattendue s'est produite.";
-        HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR; // Default to 500
+public class CustomErrorController {
+    
+    @RequestMapping(value = "/error", method = {
+        RequestMethod.GET,
+        RequestMethod.POST,
+        RequestMethod.PUT,
+        RequestMethod.DELETE
+    })
+    public ModelAndView handleError(HttpServletRequest request) {
+        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        int statusCode = 500; // Par défaut, erreur interne du serveur
+        String message = "Une erreur inattendue s'est produite.";
 
         if (status != null) {
-            int statusCode = Integer.valueOf(status.toString());
-            httpStatus = HttpStatus.resolve(statusCode); // Resolve HTTP status
-            if (httpStatus == null) {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR; // Default to 500 if unresolved
-            }
-
-            if (httpStatus == HttpStatus.NOT_FOUND) { // 404
-                errorMessage = "La page que vous recherchez n'a pas été trouvée.";
-            } else if (httpStatus == HttpStatus.FORBIDDEN) { // 403
-                errorMessage = "Accès refusé. Vous n'avez pas les permissions nécessaires.";
-            } else if (httpStatus == HttpStatus.BAD_REQUEST) { // 400
-                errorMessage = "Votre requête est invalide.";
+            statusCode = Integer.parseInt(status.toString());
+            HttpStatus httpStatus = HttpStatus.resolve(statusCode);
+            if (httpStatus != null) {
+                switch (httpStatus) {
+                    case NOT_FOUND:
+                        message = "La page que vous recherchez n'a pas été trouvée.";
+                        break;
+                    case FORBIDDEN:
+                        message = "Accès refusé. Vous n'avez pas les permissions nécessaires.";
+                        break;
+                    case BAD_REQUEST:
+                        message = "Votre requête est invalide.";
+                        break;
+                    default:
+                        message = "Une erreur serveur s'est produite.";
+                }
             }
         }
+        
+        Throwable exception = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+        String exceptionMessage = (exception != null) ? exception.getMessage() : "";
 
-        model.addAttribute("statusCode", httpStatus.value());
-        model.addAttribute("error", httpStatus.getReasonPhrase());
-        model.addAttribute("message", errorMessage);
-        model.addAttribute("timestamp", new java.util.Date());
-
-        Throwable exception = (Throwable) request.getAttribute(jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION);
-        if (exception != null) {
-            model.addAttribute("exceptionMessage", exception.getMessage());
-        }
-
-        return "error.html";
-    }
-
-    public String getErrorPath() {
-        return "/error"; 
+        String redirectUrl = String.format(
+            "redirect:/error.html?code=%d&message=%s&exception=%s",
+            statusCode,
+            URLEncoder.encode(message, StandardCharsets.UTF_8),
+            URLEncoder.encode(exceptionMessage, StandardCharsets.UTF_8)
+        );
+        
+        return new ModelAndView(redirectUrl);
     }
 }
