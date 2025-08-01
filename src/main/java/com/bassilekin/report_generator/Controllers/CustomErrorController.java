@@ -30,7 +30,6 @@ public class CustomErrorController implements ErrorController{
             } else if (httpStatus == HttpStatus.BAD_REQUEST) { // 400
                 errorMessage = "Votre requête est invalide.";
             }
-            // You can add more specific messages for other status codes
         }
 
         model.addAttribute("statusCode", httpStatus.value());
@@ -38,17 +37,15 @@ public class CustomErrorController implements ErrorController{
         model.addAttribute("message", errorMessage);
         model.addAttribute("timestamp", new java.util.Date());
 
-        // You can also get the exception if available
         Throwable exception = (Throwable) request.getAttribute(jakarta.servlet.RequestDispatcher.ERROR_EXCEPTION);
         if (exception != null) {
             model.addAttribute("exceptionMessage", exception.getMessage());
         }
 
-        // Return the name of your Thymeleaf/JSP template (e.g., "error.html" or "error/error-template.html")
-        return "error.html"; // This will look for src/main/resources/templates/error.html
+        return "error.html";
     }
 
     public String getErrorPath() {
-        return "/error"; // This method is required by ErrorController interface
+        return "/error"; 
     }
 }

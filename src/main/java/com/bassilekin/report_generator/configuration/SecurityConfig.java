@@ -39,7 +39,9 @@ public class SecurityConfig {
     public RequestMatcher publicEndpointsMatcher() {
         return new OrRequestMatcher(
             new AntPathRequestMatcher("/auth/**"),
-            new AntPathRequestMatcher("/api/v1/auth/**"), 
+            new AntPathRequestMatcher("/api/v1/auth/**"),
+            new AntPathRequestMatcher("/**.html"),
+            new AntPathRequestMatcher("/login.html"), 
             new AntPathRequestMatcher("/h2-console/**"),
             new AntPathRequestMatcher("/error"),
             new AntPathRequestMatcher("/actuator/health")

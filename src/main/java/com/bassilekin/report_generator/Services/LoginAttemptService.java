@@ -1,6 +1,6 @@
 package com.bassilekin.report_generator.Services; 
 
-import com.bassilekin.report_generator.Entity.User;
+import com.bassilekin.report_generator.Model.User;
 import com.bassilekin.report_generator.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

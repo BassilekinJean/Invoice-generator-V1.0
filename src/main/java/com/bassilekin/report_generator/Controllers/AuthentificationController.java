@@ -4,9 +4,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bassilekin.report_generator.DTOs.UserLoginDto;
 import com.bassilekin.report_generator.DTOs.UserRegistrationDto;
-import com.bassilekin.report_generator.Entity.User;
-import com.bassilekin.report_generator.Repository.UserRepository;
 import com.bassilekin.report_generator.Services.LoginAttemptService;
+import com.bassilekin.report_generator.Services.UserService;
 import com.bassilekin.report_generator.configuration.JWTutils;
 
 import io.github.resilience4j.ratelimiter.RateLimiter;
@@ -15,7 +14,6 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +27,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,12 +38,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Slf4j
-public class InscriptionConnexionContoller {
+public class AuthentificationController {
 
     private final JWTutils jwtUtils;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final LoginAttemptService loginAttemptService; 
+    private final UserService registrationService;
     private final AuthenticationManager authenticationManager;
 
     private final RateLimiter loginRateLimiter;
@@ -64,19 +60,13 @@ public class InscriptionConnexionContoller {
                 return ResponseEntity.badRequest().body("Les mots de passe ne correspondent pas.");
             }
 
-            if (userRepository.findByUserEmail(registrationDto.userEmail()) != null) {
+            if (registrationService.findUserWithEmail(registrationDto.userEmail()) != null) {
                 return ResponseEntity.badRequest().body("Un utilisateur avec cet identifiant existe déjà");
             }
 
-            User newUser = new User();
-            newUser.setUserName(registrationDto.userName());
-            newUser.setUserAddress(registrationDto.userAddress());
-            newUser.setUserPhone(registrationDto.userPhone());
-            newUser.setUserEmail(registrationDto.userEmail());
-            newUser.setUserPassword(passwordEncoder.encode(registrationDto.userPassword()));
-            newUser.setRole("ROLE_USER");
+            registrationService.registerNewUser(registrationDto);
 
-            return ResponseEntity.ok(userRepository.save(newUser));
+            return ResponseEntity.ok("Inscription et profil enregistrés avec succès.");
 
         } catch (RequestNotPermitted e) {
             log.warn("Tentative d'enregistrement limitée pour l'email: {}", registrationDto.userEmail());

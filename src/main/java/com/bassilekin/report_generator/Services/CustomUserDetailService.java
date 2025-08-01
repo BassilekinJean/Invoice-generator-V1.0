@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.bassilekin.report_generator.Entity.User;
+import com.bassilekin.report_generator.Model.User;
 import com.bassilekin.report_generator.Repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class CustomUserDetailService implements UserDetailsService{
         return new org.springframework.security.core.userdetails.User(
             user.getUserEmail(),
             user.getUserPassword(),
-            Collections.singletonList(new SimpleGrantedAuthority(user.getRole()))
+            Collections.singletonList(new SimpleGrantedAuthority(user.getRole().toString()))
         );
     }
 }

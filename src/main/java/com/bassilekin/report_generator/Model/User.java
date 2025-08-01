@@ -1,14 +1,18 @@
-package com.bassilekin.report_generator.Entity;
+package com.bassilekin.report_generator.Model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
+import com.bassilekin.report_generator.enums.AuthProvider;
+import com.bassilekin.report_generator.enums.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,27 +28,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    @NotBlank(message = "Name cannot be empty")
-    private String userName;
-
-    private String userAddress;
-
-    @NotNull
-    @Column(nullable = false)
-    private Number userPhone;
-
     @Column(nullable = false, unique = true)
-    @NotBlank(message = "Email cannot be empty")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "L'email ne peut pas etre vide")
+    @Email(message = "Format d'email invalide")
     private String userEmail;
 
     @Column(nullable = false)
-    @NotBlank(message = "Password cannot be empty")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @NotBlank(message = "Le mot de passe ne peut pas etre vide")
+    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
     private String userPassword;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    // private String role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider = AuthProvider.LOCAL; 
+
+    private String providerId;
 
     @Column(nullable = false)
     private int failedAttempt = 0;
@@ -52,4 +55,5 @@ public class User {
     private LocalDateTime lockTime;
 
     private boolean accountLocked = false; 
+
 }

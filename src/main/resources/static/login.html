@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f4f4f4; }
+        .login-container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #555; }
+        input[type="email"], input[type="password"] { width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-bottom: 10px;} /* Ajout de margin-bottom */
+        button:hover { background-color: #0056b3; }
+        .google-btn {
+            background-color: #db4437;
+        }
+        .google-btn:hover {
+            background-color: #c23321;
+        }
+        #message { text-align: center; margin-top: 15px; color: red; }
+        .register-link { text-align: center; margin-top: 20px; }
+        .register-link a { color: #007bff; text-decoration: none; }
+        .register-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Connexion</h2>
+        <form id="loginForm">
+            <label for="userEmail">Email:</label>
+            <input type="email" id="userEmail" name="userEmail" required><br>
+
+            <label for="userPassword">Mot de passe:</label>
+            <input type="password" id="userPassword" name="userPassword" required><br>
+
+            <button type="submit">Se connecter</button>
+            <button type="button" id="googleSignInButton" class="google-btn">Se connecter avec Google</button>
+        </form>
+        <div id="message"></div>
+        <div class="register-link">
+            Pas encore de compte ? <a href="/api/v1/register.html">S'inscrire</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Empêche le rechargement de la page
+
+            const userEmail = document.getElementById('userEmail').value;
+            const userPassword = document.getElementById('userPassword').value;
+            const messageDiv = document.getElementById('message');
+
+            const loginData = {
+                username: userEmail,
+                password: userPassword
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/auth/login', { 
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const token = data.token; 
+                    
+                    localStorage.setItem("jwtToken", token); // Stocke le token
+                    console.log("token sauvegardé");
+                    messageDiv.style.color = 'green';
+                    messageDiv.textContent = 'Connexion réussie ! Redirection...';
+                    
+                    window.location.href = '/api/v1/dashboard.html'; // CORRIGÉ: Redirection vers le dashboard
+                } else {
+                    const errorData = await response.json();
+                    messageDiv.style.color = 'red';
+                    messageDiv.textContent = errorData.message || 'Échec de la connexion.';
+                }
+            } catch (error) {
+                console.error('Erreur lors de la connexion:', error);
+                messageDiv.style.color = 'red';
+                messageDiv.textContent = 'Erreur réseau ou technique.';
+            }
+        });
+
+        // Gérer la connexion Google
+        document.getElementById('googleSignInButton').addEventListener('click', () => {
+            // Cette URL doit correspondre à l'endpoint Spring Security OAuth2 de votre backend
+            window.location.href = 'http://localhost:8080/oauth2/authorization/google'; 
+        });
+    </script>
+</body>
+</html>
