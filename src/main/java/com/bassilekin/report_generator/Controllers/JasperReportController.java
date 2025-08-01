@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller; 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller 
-@RequestMapping("/") 
+@RequestMapping("/invoice") 
 @RequiredArgsConstructor
 public class JasperReportController {
 
@@ -30,6 +31,7 @@ public class JasperReportController {
      * Affiche le formulaire de génération de rapport.
      */
     @GetMapping("/generate-report-form") 
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')") 
     public String showReportForm(Model model) {
         Invoice defaultInvoice = new Invoice();
         
@@ -46,6 +48,7 @@ public class JasperReportController {
      * Le fichier sera directement téléchargé par le navigateur.
      */
     @PostMapping("/generate-pdf") // Endpoint pour la soumission du formulaire
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')") 
     public ResponseEntity<byte[]> generatePDFFromForm(@ModelAttribute Invoice invoice) {
         try {
             String jasperPath = new File("src/main/resources/Report/Invoice.jasper").getAbsolutePath();

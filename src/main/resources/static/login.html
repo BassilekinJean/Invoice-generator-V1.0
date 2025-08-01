@@ -74,7 +74,7 @@
                     messageDiv.style.color = 'green';
                     messageDiv.textContent = 'Connexion réussie ! Redirection...';
                     
-                    window.location.href = '/api/v1/dashboard.html'; // CORRIGÉ: Redirection vers le dashboard
+                    window.location.href = '/api/v1/invoice/generate-report-form';
                 } else {
                     const errorData = await response.json();
                     messageDiv.style.color = 'red';
@@ -89,7 +89,6 @@
 
         // Gérer la connexion Google
         document.getElementById('googleSignInButton').addEventListener('click', () => {
-            // Cette URL doit correspondre à l'endpoint Spring Security OAuth2 de votre backend
             window.location.href = 'http://localhost:8080/oauth2/authorization/google'; 
         });
     </script>

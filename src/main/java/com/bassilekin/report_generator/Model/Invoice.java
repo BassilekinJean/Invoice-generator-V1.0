@@ -24,6 +24,6 @@ public class Invoice {
     private String technicianPhone;
     private String technicianEmail;
     private String termesContrat;
-    private List<Item> items; // La liste des items
+    private List<Item> items; 
     
 }
