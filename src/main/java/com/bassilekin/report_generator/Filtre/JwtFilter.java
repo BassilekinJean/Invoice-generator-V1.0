@@ -54,23 +54,20 @@ public class JwtFilter extends OncePerRequestFilter{
 
         String username = jwTutils.extractUsername(token);
 
+        // On vérifie que le token est valide et que l'utilisateur n'est pas déjà authentifié
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            
+            // On vérifie les invalidations avant la validation finale
+            if (jwTutils.isTokenInvalidated(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        if (jwTutils.isTokenInvalidated(token)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
-            response.getWriter().write("Votre session a été déconnectée ou le jeton invalidé.");
-            return; // Arrête la chaîne de filtres ici
-        }
+            // On charge les détails de l'utilisateur et on valide le token
+            UserDetails userDetails = userDetailService.loadUserByUsername(username); 
 
-        if (token != null && username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwTutils.validateToken(token, username)) {
-                UserDetails userDetails = userDetailService.loadUserByUsername(username); 
-
-                //Vérifier l'expiration après la blacklist
-                if (jwTutils.isTokenExpired(token)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); 
-                    response.getWriter().write("Le jeton d'accès a expiré. Veuillez vous reconnecter.");
-                    return; // Arrête la chaîne de filtres ici
-                }
+            // Si le token est valide et non expiré
+            if (jwTutils.validateToken(token, userDetails) && !jwTutils.isTokenExpired(token)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, 
                     null,
@@ -81,6 +78,9 @@ public class JwtFilter extends OncePerRequestFilter{
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
+        
+        // On continue la chaîne de filtres. Si le token n'était pas valide,
+        // le contexte de sécurité est vide et l'AuthenticationEntryPoint sera déclenché.
         filterChain.doFilter(request, response);
     }
 }

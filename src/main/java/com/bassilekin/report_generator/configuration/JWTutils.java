@@ -62,9 +62,9 @@ public class JWTutils {
         return Keys.hmacShaKeyFor(keyBytes);
     }   
 
-    public boolean validateToken(String token, String username) {
+    public boolean validateToken(String token, UserDetails userDetails) {
         final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        return (extractedUsername.equals(userDetails) && !isTokenExpired(token));
     }
 
     // --- LOGIQUE DE BLACKLISTING AVEC REDIS ---

@@ -41,14 +41,11 @@ public class SecurityConfig {
     public RequestMatcher publicEndpointsMatcher() {
         return new OrRequestMatcher(
             new AntPathRequestMatcher("/auth/**"),
-            new AntPathRequestMatcher("/api/v1/auth/**"),
-            new AntPathRequestMatcher("/**.html"),
             new AntPathRequestMatcher("/login.html"), 
+            new AntPathRequestMatcher("/gifs.gif"),
+            new AntPathRequestMatcher("/register.html"), 
             new AntPathRequestMatcher("/h2-console/**"),
-            new AntPathRequestMatcher("/error.html**"),
-            new AntPathRequestMatcher("/api/v1/error.html**"),
-            new AntPathRequestMatcher("/error**"),
-            new AntPathRequestMatcher("/api/v1/error**"),
+            new AntPathRequestMatcher("/error"),
             new AntPathRequestMatcher("/actuator/health")
         );
     }
@@ -59,10 +56,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(publicEndpointsMatcher()).permitAll() 
+                    .requestMatchers("/error.html", "/images/**").permitAll()
                     .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(authenticationEntryPoint)
+                    
+                    .accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.sendRedirect("/error?code=403&message=" + accessDeniedException.getMessage());
+                    })
+                    .authenticationEntryPoint(authenticationEntryPoint)
                 )
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())) // Pour H2 console

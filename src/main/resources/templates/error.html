@@ -1,156 +1,40 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page d'Erreur</title>
+    <title>Erreur</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #ffffff; }
         .frem {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            text-align: center;
-            background: url('../static/images/gifs.gif');
-            background-position: center;
-            background-repeat: no-repeat        
+            width: 100%; height: 100vh; display: flex; justify-content: center;
+            align-items: center; flex-direction: column; text-align: center;
+            background: url('/api/v1/images/gifs.gif'); background-position: center;
+            background-repeat: no-repeat;
         }
-        
         .frem p {
-            position: absolute;
-            top: 3rem;
-            font-size: 7rem;
-            color: rgba(0, 0, 0, 0.4);
+            position: absolute; top: 3rem; font-size: 7rem; color: rgba(0, 0, 0, 0.4);
             font-weight: bold;
         }
-        
-        .frem h2 {
-            position: absolute;
-            bottom: 8rem;
-            font-size: 34px;
-            color: #333;
-        }
-        
-        .frem h5 {
-            position: absolute;
-            bottom: 6rem;
-            color: #666;
-            font-weight: normal;
-        }
-        
+        .frem h2 { position: absolute; bottom: 8rem; font-size: 34px; color: #333; }
+        .frem h5 { position: absolute; bottom: 6rem; color: #666; font-weight: normal; }
         .frem a {
-            position: absolute;
-            bottom: 1rem;
-            background: linear-gradient(45deg, #ff0034, #ffbc00);
-            padding: 12px 24px;
-            color: white;
-            text-decoration: none;
-            font-size: 23px;
-            border-radius: 13px;
-            transition: transform 0.3s ease;
+            position: absolute; bottom: 1rem; background: linear-gradient(45deg, #ff0034, #ffbc00);
+            padding: 12px 24px; color: white; text-decoration: none; font-size: 23px;
+            border-radius: 13px; transition: transform 0.3s ease;
         }
-        
-        .frem a:hover {
-            transform: scale(1.05);
-        }
-        
-        .error-details {
-            position: absolute;
-            bottom: 3rem;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #666;
-            max-width: 80%;
-            text-align: center;
-            display: none;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: #666;
-        }
+        .frem a:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
     <div class="frem">
-        <div class="loading" id="loading">Chargement des informations d'erreur...</div>
+        <p th:text="${statusCode}">500</p>
+        <h2 th:text="${errorTitle}">Une erreur s'est produite</h2>
+        <h5 th:text="${errorMessage}">Veuillez réessayer plus tard</h5>
         
-        <p id="errorCode">500</p>
-        <h2 id="errorTitle">Une erreur s'est produite</h2>
-        <h5 id="errorMessage">Veuillez réessayer plus tard</h5>
-        
-        <div class="error-details" id="errorDetails">
-            <div><strong>Détails:</strong> <span id="exceptionMessage"></span></div>
-        </div>
-        
-        <a href="#" id="homeButton">Retour à l'accueil</a>
+        <a href="/api/v1/login.html" id="homeButton">Retour à l'accueil</a>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const statusCode = urlParams.get('code') || '500';
-            const message = urlParams.get('message');
-            const exception = urlParams.get('exception');
-            
-            // Récupérer les éléments DOM
-            const errorCodeElement = document.getElementById('errorCode');
-            const errorTitleElement = document.getElementById('errorTitle');
-            const errorMessageElement = document.getElementById('errorMessage');
-            const exceptionMessageElement = document.getElementById('exceptionMessage');
-            const errorDetailsElement = document.getElementById('errorDetails');
-            const homeButtonElement = document.getElementById('homeButton');
-            const loadingElement = document.getElementById('loading');
-            
-            const errorConfig = {
-                '400': { title: 'Requête invalide', defaultMessage: 'Les données envoyées sont incorrectes' },
-                '401': { title: 'Non autorisé', defaultMessage: 'Vous devez vous connecter pour accéder à cette ressource' },
-                '403': { title: 'Accès interdit', defaultMessage: 'Vous n\'avez pas les permissions nécessaires' },
-                '404': { title: 'Page introuvable', defaultMessage: 'La page que vous recherchez n\'existe pas' },
-                '500': { title: 'Erreur serveur', defaultMessage: 'Une erreur interne s\'est produite sur le serveur' },
-            };
-            
-            const config = errorConfig[statusCode] || errorConfig['500'];
-            
-            errorCodeElement.textContent = statusCode;
-            errorTitleElement.textContent = config.title;
-            errorMessageElement.textContent = message || config.defaultMessage;
-            
-            if (exception) {
-                exceptionMessageElement.textContent = decodeURIComponent(exception);
-                errorDetailsElement.style.display = 'block';
-            }
-            
-            const token = localStorage.getItem('jwtToken');
-            if (token && (statusCode === '401' || statusCode === '403')) {
-                homeButtonElement.href = '/api/v1/login.html';
-                homeButtonElement.textContent = 'Se reconnecter';
-                localStorage.removeItem('jwtToken');
-            } else if (token) {
-                homeButtonElement.href = '/api/v1/index.html';
-                homeButtonElement.textContent = 'Retour à l\'accueil';
-            } else {
-                homeButtonElement.href = '/api/v1/login.html';
-                homeButtonElement.textContent = 'Se connecter';
-            }
-            
-            loadingElement.style.display = 'none';
-        });
-    </script>
 </body>
 </html>
