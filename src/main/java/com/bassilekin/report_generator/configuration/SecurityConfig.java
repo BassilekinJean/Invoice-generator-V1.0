@@ -3,6 +3,7 @@ package com.bassilekin.report_generator.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -59,6 +60,7 @@ public class SecurityConfig {
                     .requestMatchers("/error.html", "/images/**").permitAll()
                     .anyRequest().authenticated()
                 )
+                .oauth2Login(Customizer.withDefaults())
                 .exceptionHandling(exception -> exception
                     
                     .accessDeniedHandler((request, response, accessDeniedException) -> {
