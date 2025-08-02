@@ -27,4 +27,4 @@ EXPOSE 8080
 
 LABEL maintainer="Bassilekin jean 21T2352"
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "gestio-pro.jar"]
