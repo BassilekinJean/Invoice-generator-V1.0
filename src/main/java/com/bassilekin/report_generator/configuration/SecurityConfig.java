@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                     .requestMatchers(publicEndpointsMatcher()).permitAll() 
-                    .requestMatchers("/error.html", "/images/**").permitAll()
+                    .requestMatchers("/error.html", "/images/**", "/").permitAll()
                     .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Devis</title>
+    <!-- Chargement de Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuration de la police par défaut pour une meilleure lisibilité */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Styles personnalisés pour le bouton "X" de suppression d'article */
+        .remove-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        .error-message {
+            color: #dc2626; /* red-600 */
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+        .required-field::after {
+            content: " *";
+            color: #dc2626; /* red-600 */
+        }
+        /* Style pour les champs de formulaire en cas d'erreur */
+        .is-invalid {
+            border-color: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Wrapper principal pour le dashboard -->
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <!-- Barre de navigation latérale -->
+        <aside class="bg-gray-800 text-white w-full md:w-64 p-6 flex flex-col items-center md:items-start space-y-6">
+            <div class="text-2xl font-bold mb-4">
+                <a th:href="@{/api/v1/index.html}" class="text-white hover:text-gray-300">Mon Dashbord</a>
+            </div>
+            <nav class="flex flex-col space-y-2 w-full">
+                <a th:href="@{/api/v1/index.html}" class="flex items-center px-4 py-2 rounded-lg bg-gray-700 text-white transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-dashboard mr-2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                        <line x1="9" y1="21" x2="9" y2="9"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 text-gray-300 transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text mr-2">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <line x1="10" y1="21" x2="8" y2="21"/>
+                    </svg>
+                    Rapports
+                </a>
+                <a href="#" class="flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 text-gray-300 transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings mr-2">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.11a2 2 0 0 1-1.4 1.4L4.9 6.84a2 2 0 0 0-1.2 2.76l.78 1.4a2 2 0 0 1 0 2.22l-.78 1.4a2 2 0 0 0 1.2 2.76l2.12 1.23a2 2 0 0 1 1.4 1.4v.11a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.11a2 2 0 0 1 1.4-1.4l2.12-1.23a2 2 0 0 0 1.2-2.76l-.78-1.4a2 2 0 0 1 0-2.22l.78-1.4a2 2 0 0 0-1.2-2.76l-2.12-1.23a2 2 0 0 1-1.4-1.4V4a2 2 0 0 0-2-2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Paramètres
+                </a>
+            </nav>
+            <div class="mt-auto w-full">
+                <button id="logoutButton" class="w-full flex items-center px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out mr-2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <!-- Contenu principal du dashboard -->
+        <main class="flex-1 p-6 overflow-auto">
+            <header class="flex justify-between items-center pb-4 mb-6 border-b border-gray-200">
+                <h1 class="text-3xl font-bold text-gray-900">Générateur de Devis</h1>
+            </header>
+            
+            <!-- Message d'erreur global -->
+            <div id="globalError" class="alert bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert" style="display: none;">
+                <span class="block sm:inline"></span>
+            </div>
+            
+            <!-- Formulaire de génération de devis -->
+            <form id="invoiceForm" class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Informations du Client et du Technicien</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Informations du client -->
+                    <div class="space-y-4">
+                        <h4 class="font-medium text-gray-600">Client</h4>
+                        <div>
+                            <label for="clientName" class="block text-sm font-medium text-gray-700 required-field">Nom du Client</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="clientName" name="clientName" required>
+                        </div>
+                        <div>
+                            <label for="clientAddress" class="block text-sm font-medium text-gray-700">Adresse du Client</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="clientAddress" name="clientAddress">
+                        </div>
+                        <div>
+                            <label for="clientPhone" class="block text-sm font-medium text-gray-700 required-field">Téléphone du Client</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="clientPhone" name="clientPhone" required>
+                        </div>
+                        <div>
+                            <label for="clientEmail" class="block text-sm font-medium text-gray-700">Email du Client</label>
+                            <input type="email" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="clientEmail" name="clientEmail">
+                        </div>
+                    </div>
+
+                    <!-- Informations du technicien -->
+                    <div class="space-y-4">
+                        <h4 class="font-medium text-gray-600">Technicien</h4>
+                        <div>
+                            <label for="technicianName" class="block text-sm font-medium text-gray-700 required-field">Nom du Technicien</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="technicianName" name="technicianName" required>
+                        </div>
+                        <div>
+                            <label for="technicianAddress" class="block text-sm font-medium text-gray-700">Adresse du Technicien</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="technicianAddress" name="technicianAddress">
+                        </div>
+                        <div>
+                            <label for="technicianPhone" class="block text-sm font-medium text-gray-700 required-field">Téléphone du Technicien</label>
+                            <input type="text" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="technicianPhone" name="technicianPhone" required>
+                        </div>
+                        <div>
+                            <label for="technicianEmail" class="block text-sm font-medium text-gray-700">Email du Technicien</label>
+                            <input type="email" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="technicianEmail" name="technicianEmail">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-6 border-gray-300">
+
+                <div class="mb-4">
+                    <label for="termesContrat" class="block text-sm font-medium text-gray-700">Termes du Contrat</label>
+                    <textarea class="form-textarea mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" id="termesContrat" name="termesContrat" rows="3"></textarea>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">Articles de la Facture <span class="text-red-600">*</span></h3>
+                
+                <div id="itemsContainer" class="space-y-4">
+                    <!-- Les items seront ajoutés dynamiquement par JavaScript -->
+                </div>
+                
+                <div id="itemsError" class="error-message" style="display: none;">
+                    Au moins un article doit être ajouté à la facture.
+                </div>
+                
+                <div class="mt-6 flex justify-between">
+                    <button type="button" id="addItem" class="btn bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-200">Ajouter un Article</button>
+                    <button type="submit" class="btn bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200" id="submitBtn">Générer le Rapport</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- Script de gestion des formulaires et de l'authentification -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Vérifier l'authentification au chargement de la page
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            alert('Vous devez vous connecter pour accéder à cette page.');
+            window.location.href = '/api/v1/login.html';
+            return;
+        }
+
+        const addItemButton = document.getElementById('addItem');
+        const itemsContainer = document.getElementById('itemsContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        const itemsError = document.getElementById('itemsError');
+        const globalError = document.getElementById('globalError');
+        const logoutButton = document.getElementById('logoutButton');
+        let itemIndex = 0;
+
+        // Ajouter un item par défaut au chargement
+        addInitialItem();
+
+        function addInitialItem() {
+            addNewItem();
+        }
+
+        // Gérer le bouton de déconnexion
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('jwtToken');
+            alert('Vous avez été déconnecté.');
+            window.location.href = '/api/v1/login.html';
+        });
+
+        // Validation avant soumission
+        document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const itemRows = itemsContainer.querySelectorAll('.item-row');
+            let hasValidItem = false;
+            
+            itemRows.forEach(row => {
+                const description = row.querySelector('[name*="].description"]').value.trim();
+                const quantity = row.querySelector('[name*="].quantity"]').value;
+                const unitPrice = row.querySelector('[name*="].unitPrice"]').value;
+                
+                if (description && quantity && quantity > 0 && unitPrice && unitPrice >= 0) {
+                    hasValidItem = true;
+                }
+            });
+            
+            if (!hasValidItem) {
+                itemsError.style.display = 'block';
+                itemsError.scrollIntoView({ behavior: 'smooth' });
+                return false;
+            } else {
+                itemsError.style.display = 'none';
+            }
+
+            submitFormWithAuth();
+        });
+
+        // Fonction pour soumettre le formulaire avec authentification
+        async function submitFormWithAuth() {
+            const token = localStorage.getItem('jwtToken');
+            if (!token) {
+                alert('Session expirée. Veuillez vous reconnecter.');
+                window.location.href = '/api/v1/login.html';
+                return;
+            }
+
+            // Collecter les données du formulaire
+            const invoiceData = {
+                clientName: document.getElementById('clientName').value,
+                clientAddress: document.getElementById('clientAddress').value,
+                clientPhone: document.getElementById('clientPhone').value,
+                clientEmail: document.getElementById('clientEmail').value,
+                technicianName: document.getElementById('technicianName').value,
+                technicianAddress: document.getElementById('technicianAddress').value,
+                technicianPhone: document.getElementById('technicianPhone').value,
+                technicianEmail: document.getElementById('technicianEmail').value,
+                termesContrat: document.getElementById('termesContrat').value,
+                items: []
+            };
+
+            // Collecter les items
+            const itemRows = itemsContainer.querySelectorAll('.item-row');
+            itemRows.forEach(row => {
+                const description = row.querySelector('[name*="].description"]').value.trim();
+                const quantity = parseFloat(row.querySelector('[name*="].quantity"]').value);
+                const unitPrice = parseFloat(row.querySelector('[name*="].unitPrice"]').value);
+                
+                if (description && quantity > 0 && unitPrice >= 0) {
+                    invoiceData.items.push({
+                        description: description,
+                        quantity: quantity,
+                        unitPrice: unitPrice
+                    });
+                }
+            });
+
+            try {
+                submitBtn.textContent = 'Génération en cours...';
+                submitBtn.disabled = true;
+                globalError.style.display = 'none';
+
+                const response = await fetch('/api/v1/invoice/generate-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(invoiceData)
+                });
+
+                if (response.ok) {
+                    // Télécharger le PDF
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'devis.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    alert('Devis généré avec succès !');
+                } else if (response.status === 401) {
+                    alert('Session expirée. Veuillez vous reconnecter.');
+                    localStorage.removeItem('jwtToken');
+                    window.location.href = '/api/v1/login.html';
+                } else {
+                    const errorData = await response.text();
+                    globalError.querySelector('span').textContent = 'Erreur lors de la génération du PDF: ' + errorData;
+                    globalError.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                globalError.querySelector('span').textContent = 'Erreur technique lors de la génération du PDF: ' + error.message;
+                globalError.style.display = 'block';
+            } finally {
+                submitBtn.textContent = 'Générer le Rapport';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function addNewItem() {
+            const newItemHtml = `
+                <div class="flex flex-col md:flex-row items-end gap-2 item-row">
+                    <div class="flex-1">
+                        <label for="description${itemIndex}" class="block text-sm font-medium text-gray-700 required-field">Description</label>
+                        <input type="text" id="description${itemIndex}" name="items[${itemIndex}].description" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                    </div>
+                    <div class="w-24">
+                        <label for="quantity${itemIndex}" class="block text-sm font-medium text-gray-700 required-field">Qté</label>
+                        <input type="number" id="quantity${itemIndex}" name="items[${itemIndex}].quantity" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm" required min="1">
+                    </div>
+                    <div class="w-32">
+                        <label for="unitPrice${itemIndex}" class="block text-sm font-medium text-gray-700 required-field">Prix Unitaire</label>
+                        <input type="number" step="0.01" id="unitPrice${itemIndex}" name="items[${itemIndex}].unitPrice" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm" required min="0">
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="bg-red-600 text-white rounded-md p-2 hover:bg-red-700 remove-item transition duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x">
+                                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            itemsContainer.insertAdjacentHTML('beforeend', newItemHtml);
+            itemIndex++;
+            itemsError.style.display = 'none';
+        }
+
+        addItemButton.addEventListener('click', function () {
+            addNewItem();
+        });
+
+        itemsContainer.addEventListener('click', function (event) {
+            if (event.target.closest('.remove-item')) {
+                const itemRows = itemsContainer.querySelectorAll('.item-row');
+                
+                if (itemRows.length <= 1) {
+                    alert('Au moins un article doit être conservé.');
+                    return;
+                }
+                
+                event.target.closest('.item-row').remove();
+                reindexItems();
+            }
+        });
+
+        function reindexItems() {
+            const itemRows = itemsContainer.querySelectorAll('.item-row');
+            itemRows.forEach((row, index) => {
+                row.querySelectorAll('[name^="items["]').forEach(input => {
+                    const currentName = input.getAttribute('name');
+                    input.setAttribute('name', currentName.replace(/items\[\d+\]/, `items[${index}]`));
+                });
+                row.querySelectorAll('[id^="description"], [id^="quantity"], [id^="unitPrice"]').forEach(input => {
+                    const currentId = input.getAttribute('id');
+                    const newId = currentId.replace(/\d+/, index);
+                    input.setAttribute('id', newId);
+                    const label = row.querySelector(`label[for="${currentId}"]`);
+                    if (label) {
+                        label.setAttribute('for', newId);
+                    }
+                });
+            });
+            itemIndex = itemRows.length;
+        }
+    });
+    </script>
+</body>
+</html>
