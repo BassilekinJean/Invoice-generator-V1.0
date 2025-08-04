@@ -9,19 +9,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class ViewController {
 
-    @GetMapping("/login.html")
+    @GetMapping("/login")
     public String showLoginPage() {
         return "login";
     }
 
-    @GetMapping("/register.html")
+    @GetMapping("/register")
     public String showRegisterPage() {
         return "register";
     }
 
-    @GetMapping({"/index.html", "/"})
+    @GetMapping({"/dashboard", "/"})
     public String showDashboard(Model model) {
-        // Vous pouvez ajouter des données au modèle ici si besoin
+        
         model.addAttribute("message", "Bienvenue sur votre tableau de bord !");
         return "index";
     }
