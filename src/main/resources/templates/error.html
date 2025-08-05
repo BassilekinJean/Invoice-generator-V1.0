@@ -34,7 +34,7 @@
         <h2 th:text="${errorTitle}">Une erreur s'est produite</h2>
         <h5 th:text="${errorMessage}">Veuillez réessayer plus tard</h5>
         
-        <a href="/api/v1/login.html" id="homeButton">Retour à l'accueil</a>
+        <a th:href="@{/login}" id="homeButton">Retour à l'accueil</a>
     </div>
 </body>
 </html>

@@ -42,9 +42,10 @@ public class SecurityConfig {
     public RequestMatcher publicEndpointsMatcher() {
         return new OrRequestMatcher(
             new AntPathRequestMatcher("/auth/**"),
-            new AntPathRequestMatcher("/login.html"), 
+            new AntPathRequestMatcher("/login"), 
             new AntPathRequestMatcher("/gifs.gif"),
-            new AntPathRequestMatcher("/register.html"), 
+            new AntPathRequestMatcher("/register"), 
+            new AntPathRequestMatcher("/dashboard"), 
             new AntPathRequestMatcher("/h2-console/**"),
             new AntPathRequestMatcher("/error"),
             new AntPathRequestMatcher("/actuator/health")
@@ -61,6 +62,12 @@ public class SecurityConfig {
                     .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
+                .formLogin(form -> form
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/dashboard", true)
+                    .failureUrl("/error?statusCode=%d&errorMessage=%s")
+                    .permitAll()
+                )
                 .exceptionHandling(exception -> exception
                     
                     .accessDeniedHandler((request, response, accessDeniedException) -> {

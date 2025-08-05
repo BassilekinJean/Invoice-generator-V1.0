@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
+    
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
@@ -22,9 +22,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         // Message d'erreur personnalisé
         String errorMessage = "Jeton d'authentification manquant ou invalide.";
         
-        // Construction de l'URL de redirection
+        // Construction de l'URL de redirection vers l'endpoint du contrôleur
         String redirectUrl = String.format(
-            "/error.html?code=%d&message=%s",
+            "/error?statusCode=%d&errorMessage=%s",
             HttpServletResponse.SC_UNAUTHORIZED, // code 401
             URLEncoder.encode(errorMessage, StandardCharsets.UTF_8)
         );

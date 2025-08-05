@@ -35,17 +35,17 @@ public class UserService {
             newUser.setRole(Role.ROLE_USER);
         }
 
-        User savedUser = userRepository.save(newUser);
+        userRepository.save(newUser);
 
-        UserProfils userProfile = new UserProfils();
-        userProfile.setUser(savedUser);
-        userProfile.setFirstName(registrationDto.firstName());
-        userProfile.setLastName(registrationDto.lastName());
-        userProfile.setContactEmail(registrationDto.contactEmail());
-        userProfile.setUserAddress(registrationDto.userAddress());
-        userProfile.setUserPhone(registrationDto.userPhone());
+        // UserProfils userProfile = new UserProfils();
+        // userProfile.setUser(savedUser);
+        // userProfile.setFirstName(registrationDto.firstName());
+        // userProfile.setLastName(registrationDto.lastName());
+        // userProfile.setContactEmail(registrationDto.contactEmail());
+        // userProfile.setUserAddress(registrationDto.userAddress());
+        // userProfile.setUserPhone(registrationDto.userPhone());
 
-        userProfileRepository.save(userProfile);
+        // userProfileRepository.save(userProfile);
     }
 
     public User findUserWithEmail(String email){

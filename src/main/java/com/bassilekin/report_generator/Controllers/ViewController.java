@@ -19,9 +19,14 @@ public class ViewController {
         return "register";
     }
 
-    @GetMapping({"/dashboard", "/"})
+    @GetMapping("/profile")
+    public String showProfilePage() {
+        return "profile";
+    }
+
+    @GetMapping({"/dashboard"})
     public String showDashboard(Model model) {
-        
+
         model.addAttribute("message", "Bienvenue sur votre tableau de bord !");
         return "index";
     }

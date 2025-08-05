@@ -12,18 +12,18 @@ public record UserRegistrationDto(
     String userEmail,
 
 
-    @NotBlank(message = "Le nom ne peut pas etre vide")
-    String firstName,
+    // @NotBlank(message = "Le nom ne peut pas etre vide")
+    // String firstName,
 
-    @NotBlank(message = "Le nom ne peut pas etre vide")
-    String lastName,
+    // @NotBlank(message = "Le nom ne peut pas etre vide")
+    // String lastName,
 
-    String contactEmail,
+    // String contactEmail,
 
-    String userAddress,
+    // String userAddress,
 
-    @NotNull(message = "Le numéro de téléphone ne peut pas être vide")
-    Number userPhone,
+    // @NotNull(message = "Le numéro de téléphone ne peut pas être vide")
+    // Number userPhone,
 
 
     @NotBlank(message = "Le mot de passe ne peut etre vide")

@@ -130,7 +130,8 @@
 
             const registrationData = {
                 userEmail: userEmailInput.value,
-                userPassword: userPasswordInput.value
+                userPassword: userPasswordInput.value,
+                confirmPassword: confirmPasswordInput.value
             };
 
             try {
@@ -145,7 +146,7 @@
                 if (response.ok) {
                     messageDiv.innerHTML = '<div class="alert alert-success">Inscription réussie ! Redirection vers la page de connexion...</div>';
                     setTimeout(() => {
-                        window.location.href = '/api/v1/login.html'; 
+                        window.location.href = '/api/v1/login'; 
                     }, 2000); 
                 } else {
                     const errorData = await response.json();
