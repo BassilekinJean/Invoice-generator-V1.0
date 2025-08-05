@@ -26,6 +26,7 @@ public class UserService {
         newUser.setUserPassword(passwordEncoder.encode(registrationDto.userPassword()));
         newUser.setProvider(AuthProvider.LOCAL);
         
+        // temporairement, on attribue un rôle admin si l'email est
         if ("admin@gmail.com".equals(registrationDto.userEmail())) { 
             newUser.setRole(Role.ROLE_ADMIN); 
         } else {
