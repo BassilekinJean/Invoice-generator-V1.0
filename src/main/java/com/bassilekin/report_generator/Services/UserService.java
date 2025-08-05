@@ -2,8 +2,6 @@ package com.bassilekin.report_generator.Services;
 
 import com.bassilekin.report_generator.DTOs.UserRegistrationDto;
 import com.bassilekin.report_generator.Model.User;
-import com.bassilekin.report_generator.Model.UserProfils;
-import com.bassilekin.report_generator.Repository.UserProfilRepository;
 import com.bassilekin.report_generator.Repository.UserRepository;
 import com.bassilekin.report_generator.enums.AuthProvider;
 import com.bassilekin.report_generator.enums.Role;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserProfilRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -36,16 +33,6 @@ public class UserService {
         }
 
         userRepository.save(newUser);
-
-        // UserProfils userProfile = new UserProfils();
-        // userProfile.setUser(savedUser);
-        // userProfile.setFirstName(registrationDto.firstName());
-        // userProfile.setLastName(registrationDto.lastName());
-        // userProfile.setContactEmail(registrationDto.contactEmail());
-        // userProfile.setUserAddress(registrationDto.userAddress());
-        // userProfile.setUserPhone(registrationDto.userPhone());
-
-        // userProfileRepository.save(userProfile);
     }
 
     public User findUserWithEmail(String email){
