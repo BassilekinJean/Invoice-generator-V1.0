@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.bassilekin.report_generator.enums.AuthProvider;
 import com.bassilekin.report_generator.enums.Role;
@@ -16,6 +18,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -41,8 +44,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // private String role;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AuthProvider provider = AuthProvider.LOCAL; 
@@ -56,4 +57,6 @@ public class User {
 
     private boolean accountLocked = false; 
 
+    @OneToMany(mappedBy = "users")
+    private List<Item> itemsList = new ArrayList<>();
 }

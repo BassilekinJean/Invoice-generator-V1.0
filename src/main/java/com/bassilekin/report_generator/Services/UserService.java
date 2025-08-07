@@ -6,6 +6,7 @@ import com.bassilekin.report_generator.Repository.UserRepository;
 import com.bassilekin.report_generator.enums.AuthProvider;
 import com.bassilekin.report_generator.enums.Role;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "User Service", description = "Logique Métier de gestion des utilisateurs")
 public class UserService {
 
     private final UserRepository userRepository;

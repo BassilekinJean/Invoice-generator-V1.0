@@ -172,6 +172,12 @@
     <!-- Script de gestion des formulaires et de l'authentification -->
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+            afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
+            window.location.href = '/api/v1/login';
+            return;
+        }
         // Configuration de l'affichage du menu
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -183,14 +189,6 @@
         sidebarClose.addEventListener('click', () => {
             sidebar.classList.add('-translate-x-full');
         });
-
-        // Vérifier l'authentification au chargement de la page
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-            afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
-            window.location.href = '/api/v1/login';
-            return;
-        }
 
         // Gérer la vérification et l'affichage du message de profil
         checkProfileStatus(token);
@@ -209,11 +207,33 @@
             addNewItem();
         }
 
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('jwtToken');
-            afficherMessage('Vous avez été déconnecté.', 'green');
-            window.location.href = '/api/v1/login';
+        logoutButton.addEventListener('click', async () => {
+            const token = localStorage.getItem('jwtToken');
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:8080/api/v1/auth/logout', { 
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}` // Envoyer le token pour l'invalider côté serveur si nécessaire
+                        }
+                    });
+
+                    if (response.ok) {
+                        localStorage.removeItem('jwtToken'); // Supprime le token du stockage local
+                        window.location.href = '/api/v1/login'; // Redirige vers la page de connexion
+                    } else {
+                        console.error('Échec de la déconnexion côté serveur');
+                        alert('Échec de la déconnexion.');
+                    }
+                } catch (error) {
+                    console.error('Erreur réseau lors de la déconnexion:', error);
+                    alert('Erreur réseau lors de la déconnexion.');
+                }
+            } else {
+                window.location.href = '/api/v1/login'; // Pas de token, juste rediriger
+            }
         });
+
 
         document.getElementById('invoiceForm').addEventListener('submit', function(e) {
             e.preventDefault();
