@@ -197,7 +197,7 @@
                 window.location.href = '/api/v1/login'; // Pas de token, juste rediriger
             }
         });
-        
+
         profileForm.addEventListener('submit', function(e) {
             e.preventDefault();
             saveProfileData(token);
@@ -223,6 +223,10 @@
                     afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
                     localStorage.removeItem('jwtToken');
                     window.location.href = '/api/v1/login';
+                } else if (response.status === 404) {
+                    document.getElementById('profileAlert').style.display = 'block'; // Afficher l'alerte si le profil n'existe pas
+                    globalMessage.classList.add('hidden');
+                    globalError.classList.add('hidden');
                 } else {
                     afficherMessage('Erreur lors du chargement du profil.', 'red');
                 }
