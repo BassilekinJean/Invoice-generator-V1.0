@@ -34,7 +34,7 @@ public class UserProfileController {
     {
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null ) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Token manquant ou invalide");
         }
         String token = authHeader.substring(7);
