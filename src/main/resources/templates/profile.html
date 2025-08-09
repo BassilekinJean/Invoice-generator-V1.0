@@ -266,6 +266,10 @@
                     afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
                     localStorage.removeItem('jwtToken');
                     window.location.href = '/api/v1/login';
+                } else if (response.status === 400) {
+                    const errorData = await response.json();
+                    globalError.querySelector('span').textContent = 'Erreur de validation: ' + errorData.message;
+                    globalError.classList.remove('hidden');
                 } else {
                     const errorData = await response.text();
                     globalError.querySelector('span').textContent = 'Erreur lors de la mise à jour du profil: ' + errorData;
