@@ -31,11 +31,7 @@ public class UserProfils {
 
     @Column(nullable = false)
     @NotBlank(message = "Le nom ne peut pas etre vide")
-    String lastName;
-
-    @Column(nullable = false)
-    @NotBlank(message = "Le nom ne peut pas etre vide")
-    private String firstName;
+    private String userName;
 
     String contactEmail;
 

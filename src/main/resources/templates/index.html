@@ -207,6 +207,7 @@
             addNewItem();
         }
 
+        //Déconnexion 
         logoutButton.addEventListener('click', async () => {
             const token = localStorage.getItem('jwtToken');
             if (token) {

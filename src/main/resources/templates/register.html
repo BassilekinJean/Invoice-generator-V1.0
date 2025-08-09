@@ -146,7 +146,12 @@
                 if (response.ok) {
                     messageDiv.innerHTML = '<div class="alert alert-success">Inscription réussie ! Redirection vers la page de connexion...</div>';
                     setTimeout(() => {
-                        window.location.href = '/api/v1/login'; 
+                        const loginDta = {
+                            username: registrationData.userEmail,
+                            password: registrationData.userPassword
+                        }
+                        redirectProfil(loginDta);
+                       //window.location.href = '/api/v1/login';                       
                     }, 2000); 
                 } else {
                     const errorData = await response.json();
@@ -162,6 +167,28 @@
             window.location.href = 'http://localhost:8080/oauth2/authorization/google';
         });
     });
+
+    async function redirectProfil(loginData) {
+        const response = await fetch('http://localhost:8080/api/v1/auth/login', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const token = data.token; 
+            
+            localStorage.setItem("jwtToken", token);
+            messageDiv.classList.add('bg-green-100', 'text-green-700');
+            messageDiv.textContent = 'Connexion réussie ! Redirection...';
+
+            window.location.href = '/api/v1/profile';
+        }
+    }
+    
 </script>
 
 </body>

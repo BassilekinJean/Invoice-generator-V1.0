@@ -7,8 +7,10 @@ import com.bassilekin.report_generator.enums.AuthProvider;
 import com.bassilekin.report_generator.enums.Role;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Random;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
     public void registerNewUser(UserRegistrationDto registrationDto) {
        
         User newUser = new User();
@@ -40,5 +41,15 @@ public class UserService {
 
     public User findUserWithEmail(String email){
          return userRepository.findByUserEmail(email);
+    }
+
+    public String generateOtp(){
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        return String.valueOf(otp);
+    }
+
+    public Boolean verifiedEmail(){
+        return null;
     }
 }

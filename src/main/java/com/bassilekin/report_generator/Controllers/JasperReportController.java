@@ -2,6 +2,9 @@ package com.bassilekin.report_generator.Controllers;
 
 import com.bassilekin.report_generator.Model.Invoice;
 import com.bassilekin.report_generator.Services.ReportService;
+import com.bassilekin.report_generator.configuration.JWTutils;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +25,7 @@ public class JasperReportController {
 
     @Autowired
     private final ReportService reportService;
-
+    private final JWTutils jwtUtils;
 
     /**
      * Génère le PDF à partir des données soumises par le formulaire.
@@ -31,12 +34,21 @@ public class JasperReportController {
     @PostMapping("/generate-pdf") // Endpoint pour la soumission du formulaire
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')") 
     @ResponseBody
-    public ResponseEntity<byte[]> generatePDFFromForm(@RequestBody Invoice invoice) {
+    public ResponseEntity<?> generatePDFFromForm(@RequestBody Invoice invoice, HttpServletRequest request){
         try {
             String jasperPath = new File("src/main/resources/Report/Invoice.jasper").getAbsolutePath();
             Map<String, Object> parameters = new HashMap<>();
-            
-            byte[] pdfData = reportService.generateInvoiceReport(invoice, jasperPath, parameters);
+
+            String authHeader = request.getHeader("Authorization");
+            String token = authHeader.substring(7);
+            if (!jwtUtils.isTokenInvalidated(token)) {
+                return ResponseEntity.status(401).body("Session expirée ou invalide");
+            }
+
+            String email = jwtUtils.extractUsername(token);
+
+            byte[] pdfData = reportService.generateInvoiceReport(invoice, jasperPath, parameters, email);
+
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

@@ -57,6 +57,6 @@ public class User {
 
     private boolean accountLocked = false; 
 
-    @OneToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "user")
     private List<Item> itemsList = new ArrayList<>();
 }

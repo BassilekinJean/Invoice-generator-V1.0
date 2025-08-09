@@ -171,12 +171,33 @@
         // Gérer le chargement des données de profil
         loadProfileData(token);
 
-        logoutButton.addEventListener('click', () => {
-            localStorage.removeItem('jwtToken');
-            afficherMessage('Vous avez été déconnecté.', 'green');
-            window.location.href = '/api/v1/login';
-        });
+        logoutButton.addEventListener('click', async () => {
+            const token = localStorage.getItem('jwtToken');
+            if (token) {
+                try {
+                    const response = await fetch('http://localhost:8080/api/v1/auth/logout', { 
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}` // Envoyer le token pour l'invalider côté serveur si nécessaire
+                        }
+                    });
 
+                    if (response.ok) {
+                        localStorage.removeItem('jwtToken'); // Supprime le token du stockage local
+                        window.location.href = '/api/v1/login'; // Redirige vers la page de connexion
+                    } else {
+                        console.error('Échec de la déconnexion côté serveur');
+                        alert('Échec de la déconnexion.');
+                    }
+                } catch (error) {
+                    console.error('Erreur réseau lors de la déconnexion:', error);
+                    alert('Erreur réseau lors de la déconnexion.');
+                }
+            } else {
+                window.location.href = '/api/v1/login'; // Pas de token, juste rediriger
+            }
+        });
+        
         profileForm.addEventListener('submit', function(e) {
             e.preventDefault();
             saveProfileData(token);
@@ -184,7 +205,7 @@
 
         async function loadProfileData(token) {
             try {
-                const response = await fetch('/api/v1/profile', {
+                const response = await fetch('/api/v1/info/profile', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -226,8 +247,8 @@
                 globalMessage.classList.add('hidden');
                 globalError.classList.add('hidden');
 
-                const response = await fetch('/api/v1/profile', {
-                    method: 'PUT',
+                const response = await fetch('/api/v1/info/profile', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`

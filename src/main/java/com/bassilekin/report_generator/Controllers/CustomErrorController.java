@@ -14,7 +14,8 @@ public class CustomErrorController implements ErrorController {
     
     @RequestMapping(value = "/error", method = {
         RequestMethod.GET,
-        RequestMethod.POST
+        RequestMethod.POST,
+        RequestMethod.PUT
     })
     public String handleError(
         HttpServletRequest request,

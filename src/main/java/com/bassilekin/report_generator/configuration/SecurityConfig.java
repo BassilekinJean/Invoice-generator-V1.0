@@ -45,6 +45,8 @@ public class SecurityConfig {
             new AntPathRequestMatcher("/login"), 
             new AntPathRequestMatcher("/gifs.gif"),
             new AntPathRequestMatcher("/register"), 
+            new AntPathRequestMatcher("/profile"), 
+            new AntPathRequestMatcher("/setting"), 
             new AntPathRequestMatcher("/dashboard"), 
             new AntPathRequestMatcher("/h2-console/**"),
             new AntPathRequestMatcher("/error"),

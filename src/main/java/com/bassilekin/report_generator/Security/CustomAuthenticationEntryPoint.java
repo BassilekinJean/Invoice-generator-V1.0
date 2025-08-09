@@ -1,4 +1,3 @@
-// Dans un nouveau fichier, par exemple CustomAuthenticationEntryPoint.java
 package com.bassilekin.report_generator.Security;
 
 import jakarta.servlet.ServletException;
