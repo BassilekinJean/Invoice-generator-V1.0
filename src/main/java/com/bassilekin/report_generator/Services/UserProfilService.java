@@ -84,4 +84,15 @@ public class UserProfilService {
             return dto;
         }).orElse(null);
     }
+
+    public boolean isProfileConfigured(String email) {
+        User user = userRepository.findByUserEmail(email);
+        Optional<UserProfils> userProfile = userProfilRepository.findById(user.getId());
+        
+        // Vérifie si le profil existe et s'il contient les informations nécessaires
+        return userProfile.isPresent() && 
+               userProfile.get().getUserAddress() != null &&
+               userProfile.get().getUserPhone() != null &&
+               userProfile.get().getUserName() != null;
+    }
 }

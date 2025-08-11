@@ -9,8 +9,6 @@ import com.bassilekin.report_generator.enums.Role;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Random;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,13 +41,4 @@ public class UserService {
          return userRepository.findByUserEmail(email);
     }
 
-    public String generateOtp(){
-        Random random = new Random();
-        int otp = 100000 + random.nextInt(900000);
-        return String.valueOf(otp);
-    }
-
-    public Boolean verifiedEmail(){
-        return null;
-    }
 }

@@ -55,7 +55,7 @@ public class UserProfileController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UserProfilDto userProfilDto, HttpServletRequest request) {
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UserProfilDto userProfilDto, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         String token = authHeader.substring(7);
         if (jwtUtils.isTokenInvalidated(token)) {
@@ -91,5 +91,24 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfile);
     }
     
+    @GetMapping("/profile/is-configured")
+    public ResponseEntity<?> isProfileConfigured(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).body("Token manquant ou invalide");
+        }
+
+        String token = authHeader.substring(7);
+
+        if (jwtUtils.isTokenInvalidated(token)) {
+            return ResponseEntity.status(401).body("Session expirée ou invalide");
+        }
+
+        String email = jwtUtils.extractUsername(token);
+        boolean isConfigured = userProfilService.isProfileConfigured(email);
+        
+        return ResponseEntity.ok(isConfigured);
+    }
     
 }

@@ -126,12 +126,12 @@
             <p class="text-center">Un code de vérification à 6 chiffres a été envoyé à votre adresse e-mail.</p>
             <form id="otpForm">
                 <div class="mb-3 otp-input-group">
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
-                    <input type="text" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" class="form-control otp-input" maxlength="1" required>
                 </div>
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-primary">Vérifier</button>
@@ -169,19 +169,18 @@
                 return;
             }
 
-            const registrationData = {
-                userEmail: userEmailInput.value,
-                userPassword: userPasswordInput.value
+            const registrationOtpData = {
+                userEmail: userEmailInput.value
             };
 
             try {
                 // Étape 1 : Demander l'envoi de l'OTP
-                const response = await fetch('http://localhost:8080/api/v1/auth/register-request-otp', {
+                const response = await fetch('http://localhost:8080/api/v1/auth/request-otp', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(registrationData)
+                    body: JSON.stringify(registrationOtpData)
                 });
 
                 if (response.ok) {
@@ -189,6 +188,10 @@
                     registerContainer.style.display = 'none';
                     otpContainer.style.display = 'block';
                     otpInputs[0].focus(); // Focus sur le premier champ de l'OTP
+                }else if (response.status === 500) {
+                    const errorData = await response.json();
+                    console.error('Erreur interne lors de la demande de l\'OTP:', errorData);
+                    registerMessageDiv.innerHTML = `<div class="alert alert-danger">${errorData.message || 'Erreur lors de l\'envoi de l\'OTP.'}</div>`;
                 } else {
                     const errorData = await response.json();
                     registerMessageDiv.innerHTML = `<div class="alert alert-danger">${errorData.message || 'Échec de l\'envoi de l\'OTP.'}</div>`;
@@ -242,13 +245,19 @@
                 if (response.ok) {
                     otpMessageDiv.innerHTML = '<div class="alert alert-success">Vérification réussie ! Redirection vers la page de profil...</div>';
                     // L'utilisateur est maintenant inscrit et vérifié.
+                    inscriptionUser();
                     // On peut procéder à la connexion et la redirection.
                     const loginData = {
                         username: userEmailInput.value,
                         password: userPasswordInput.value
                     };
                     redirectProfil(loginData);
-                } else {
+                }else if (response.status === 404) {
+                    otpMessageDiv.innerHTML = '<div class="alert alert-danger">Code de vérification invalide ou expiré.</div>';
+                } else if (response.status === 500) {
+                    const errorData = await response.json();
+                    otpMessageDiv.innerHTML = `<div class="alert alert-danger">${errorData.message || 'Erreur interne lors de la vérification de l\'OTP.'}</div>`;
+                }else {
                     const errorData = await response.json();
                     otpMessageDiv.innerHTML = `<div class="alert alert-danger">${errorData.message || 'Code de vérification invalide.'}</div>`;
                 }
@@ -289,6 +298,32 @@
             } catch (error) {
                 console.error('Erreur lors de la connexion:', error);
                 otpMessageDiv.innerHTML = '<div class="alert alert-danger">Erreur réseau lors de la connexion.</div>';
+            }
+        }
+
+        async function inscriptionUser() {
+            const registerData = {
+                userEmail: userEmailInput.value,
+                userPassword: userPasswordInput.value,
+                confirmPassword: confirmPasswordInput.value
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/auth/register', {
+                    method : 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+
+                if (response.status == 400) {
+                    const errorData = await response.json();
+                    otpMessageDiv.innerHTML = `<div class="alert alert-danger">${errorData.message || "Information d'inscription erroné."}</div>`;
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'inscription", error);
+                otpMessageDiv.innerHTML = '<div class="alert alert-danger">Erreur réseau lors de votre inscription.</div>';
             }
         }
     });

@@ -17,9 +17,9 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import com.bassilekin.report_generator.Filtre.JwtFilter;
 import com.bassilekin.report_generator.Security.CustomAuthenticationEntryPoint;
 import com.bassilekin.report_generator.Services.CustomUserDetailService;
+import com.bassilekin.report_generator.component.JwtFilter;
 
 import lombok.RequiredArgsConstructor;
 

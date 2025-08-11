@@ -4,7 +4,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bassilekin.report_generator.DTOs.UserLoginDto;
 import com.bassilekin.report_generator.DTOs.UserRegistrationDto;
+import com.bassilekin.report_generator.Model.OtpRequest;
+import com.bassilekin.report_generator.Model.OtpValidation;
 import com.bassilekin.report_generator.Services.LoginAttemptService;
+import com.bassilekin.report_generator.Services.OtpService;
 import com.bassilekin.report_generator.Services.UserService;
 import com.bassilekin.report_generator.configuration.JWTutils;
 
@@ -43,6 +46,7 @@ public class AuthentificationController {
     private final JWTutils jwtUtils;
     private final LoginAttemptService loginAttemptService; 
     private final UserService registrationService;
+    private final OtpService otpService;
     private final AuthenticationManager authenticationManager;
 
     private final RateLimiter loginRateLimiter;
@@ -183,7 +187,7 @@ public class AuthentificationController {
             }
         }
 
-        if (refreshToken == null || jwtUtils.isTokenExpired(refreshToken)) { 
+        if (refreshToken == null || !jwtUtils.isTokenExpired(refreshToken)) { 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Jeton de rafraîchissement invalide ou expiré.");
         }
 
@@ -206,5 +210,37 @@ public class AuthentificationController {
         }
 
     }
+
+    @PostMapping("/request-otp")
+    public ResponseEntity<?> requestOtp(@Valid @RequestBody OtpRequest otpRegisterDto) {
+
+        String email = otpRegisterDto.getUserEmail();
+
+        if (email == null|| email.isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Veuillez fourni un email");
+        }
+        otpService.sendOtp(email);
+
+        return ResponseEntity.ok("OTP sent");
+    }
+    
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OtpValidation otpValidation) {
+        
+        String email = otpValidation.getUserEmail();
+        String otpCode = otpValidation.getOtp();
+
+        if (email.isBlank() || email == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email Invalide");
+
+        } else if (otpCode.isBlank() || otpCode == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Code OTP invalide");
+
+        }else if(otpService.isOtpValid(email, otpCode)){
+            return ResponseEntity.ok("Vérification réussi");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Code OTP Incorrecte");
+    }
+    
 
 }

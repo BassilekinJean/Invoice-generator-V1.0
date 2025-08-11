@@ -5,6 +5,7 @@ import com.bassilekin.report_generator.Services.ReportService;
 import com.bassilekin.report_generator.configuration.JWTutils;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +35,7 @@ public class JasperReportController {
     @PostMapping("/generate-pdf") // Endpoint pour la soumission du formulaire
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')") 
     @ResponseBody
-    public ResponseEntity<?> generatePDFFromForm(@RequestBody Invoice invoice, HttpServletRequest request){
+    public ResponseEntity<?> generatePDFFromForm(@Valid @RequestBody Invoice invoice, HttpServletRequest request){
         try {
             String jasperPath = new File("src/main/resources/Report/Invoice.jasper").getAbsolutePath();
             Map<String, Object> parameters = new HashMap<>();

@@ -1,4 +1,4 @@
-package com.bassilekin.report_generator.Filtre;
+package com.bassilekin.report_generator.component;
 
 import java.io.IOException;
 
