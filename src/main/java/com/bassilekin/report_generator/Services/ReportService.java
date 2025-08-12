@@ -2,6 +2,7 @@ package com.bassilekin.report_generator.Services;
 
 import org.springframework.stereotype.Service;
 
+import com.bassilekin.report_generator.DTOs.InvoiceDto;
 import com.bassilekin.report_generator.Model.Invoice;
 import com.bassilekin.report_generator.Model.User;
 import com.bassilekin.report_generator.Model.UserProfils;
@@ -31,7 +32,7 @@ public class ReportService {
     private final UserRepository userRepository;
 
     public <T> byte[] generateInvoiceReport(
-                        Invoice invoice,
+                        InvoiceDto invoiceDto,
                         String jasperPath, 
                         Map<String, Object> parameters, String email
         ) throws JRException, FileNotFoundException {
@@ -42,15 +43,15 @@ public class ReportService {
         if (parameters == null) {
             parameters = new HashMap<>();
         }
-        
-        formaterDataSource(invoice, email);
+
+        Invoice invoice = formaterDataSource(invoiceDto, email);
 
         JRBeanCollectionDataSource itemsDataSource = new JRBeanCollectionDataSource(invoice.getItems());
         parameters.put("TABLE_DATASET", itemsDataSource);
        
         // Utiliser l'objet Invoice comme source de données principale
         JRBeanCollectionDataSource mainDataSource = new JRBeanCollectionDataSource(List.of(invoice));
-        
+
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, mainDataSource);
 
         try(ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -61,14 +62,24 @@ public class ReportService {
         }
     }
 
-    private void formaterDataSource(Invoice invoice, String email){
+    private Invoice formaterDataSource(InvoiceDto invoiceDto, String email){
         User user = userRepository.findByUserEmail(email);
         Optional<UserProfils> userProfils = userProfilRepository.findById(user.getId());
         
+        Invoice invoice = new Invoice();
+        
+        invoice.setClientAddress(invoiceDto.clientAddress());
+        invoice.setClientAddress(invoiceDto.clientAddress());
+        invoice.setClientEmail(invoiceDto.clientEmail());
+        invoice.setClientName(invoiceDto.clientName());
+        invoice.setTermesContrat(invoiceDto.termesContrat());
+        invoice.setItems(invoiceDto.items());
         invoice.setTechnicianAddress(userProfils.get().getUserAddress());
         invoice.setTechnicianEmail(userProfils.get().getContactEmail());
         invoice.setTechnicianName(userProfils.get().getUserName());
         invoice.setTechnicianPhone(userProfils.get().getUserPhone());
+
+        return invoice;
     }
     
 }

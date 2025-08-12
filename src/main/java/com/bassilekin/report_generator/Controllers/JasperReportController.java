@@ -1,6 +1,6 @@
 package com.bassilekin.report_generator.Controllers;
 
-import com.bassilekin.report_generator.Model.Invoice;
+import com.bassilekin.report_generator.DTOs.InvoiceDto;
 import com.bassilekin.report_generator.Services.ReportService;
 import com.bassilekin.report_generator.configuration.JWTutils;
 
@@ -35,7 +35,7 @@ public class JasperReportController {
     @PostMapping("/generate-pdf") // Endpoint pour la soumission du formulaire
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')") 
     @ResponseBody
-    public ResponseEntity<?> generatePDFFromForm(@Valid @RequestBody Invoice invoice, HttpServletRequest request){
+    public ResponseEntity<?> generatePDFFromForm(@Valid @RequestBody InvoiceDto invoice, HttpServletRequest request){
         try {
             String jasperPath = new File("src/main/resources/Report/Invoice.jasper").getAbsolutePath();
             Map<String, Object> parameters = new HashMap<>();
