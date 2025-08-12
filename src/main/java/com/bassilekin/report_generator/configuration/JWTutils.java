@@ -101,8 +101,12 @@ public class JWTutils {
     }
 
     private <T> T extractClaim(String token, java.util.function.Function<io.jsonwebtoken.Claims, T> claimsResolver) {
-        final io.jsonwebtoken.Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        try {
+            final io.jsonwebtoken.Claims claims = extractAllClaims(token);
+            return claimsResolver.apply(claims);
+        } catch (Exception e) {
+           throw new RuntimeException("Token invalide ou expiré" + e.getMessage());
+        }
     }
 
     private Claims extractAllClaims(String token) {
