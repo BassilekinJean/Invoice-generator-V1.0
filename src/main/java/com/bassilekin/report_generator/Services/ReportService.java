@@ -69,7 +69,7 @@ public class ReportService {
         Invoice invoice = new Invoice();
         
         invoice.setClientAddress(invoiceDto.clientAddress());
-        invoice.setClientAddress(invoiceDto.clientAddress());
+        invoice.setClientPhone(invoiceDto.clientPhone());
         invoice.setClientEmail(invoiceDto.clientEmail());
         invoice.setClientName(invoiceDto.clientName());
         invoice.setTermesContrat(invoiceDto.termesContrat());
