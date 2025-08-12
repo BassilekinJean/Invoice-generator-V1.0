@@ -8,7 +8,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,8 +36,8 @@ public class UserProfils {
 
     private String userAddress;
 
-    @NotNull(message = "Le numéro de téléphone ne peut pas être vide")
+    @NotBlank(message = "Le numéro de téléphone ne peut pas être vide")
     @Column(nullable = false)
-    private Number userPhone;
+    private String userPhone;
 
 }

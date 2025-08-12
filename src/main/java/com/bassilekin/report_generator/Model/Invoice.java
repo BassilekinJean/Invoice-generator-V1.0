@@ -4,7 +4,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,8 +24,9 @@ public class Invoice {
     @NotBlank(message = "L'adresse du client est requise")
     private String clientAddress;
 
-    @NotNull(message = "Le numéro de téléphone du client est requis")
-    private Number clientPhone;
+    @NotBlank(message = "Le numéro de téléphone du client est requis")
+    @Size(min = 9, max = 15, message = "Le numéro de téléphone doit contenir entre 10 et 15 chiffres")
+    private String clientPhone;
 
     @Email(message = "L'email du client doit être valide")
     private String clientEmail;
@@ -35,7 +36,8 @@ public class Invoice {
 
     private String technicianAddress;
 
-    private Number technicianPhone;
+    @NotBlank(message = "Le numéro de téléphone du technicien est requis")
+    private String technicianPhone;
 
     @Email(message = "L'email du technicien doit être valide")
     private String technicianEmail;

@@ -42,8 +42,8 @@ public class JasperReportController {
 
             String authHeader = request.getHeader("Authorization");
             String token = authHeader.substring(7);
-            if (!jwtUtils.isTokenInvalidated(token)) {
-                return ResponseEntity.status(401).body("Session expirée ou invalide");
+            if (jwtUtils.isTokenInvalidated(token)) {
+                return ResponseEntity.status(401).body("Session expirée ou invalide lors de la génération du rapport /generate-pdf");
             }
 
             String email = jwtUtils.extractUsername(token);
