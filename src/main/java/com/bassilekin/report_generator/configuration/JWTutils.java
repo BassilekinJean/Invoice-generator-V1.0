@@ -101,11 +101,15 @@ public class JWTutils {
     }
 
     private <T> T extractClaim(String token, java.util.function.Function<io.jsonwebtoken.Claims, T> claimsResolver) {
-        try {
+       try {
             final io.jsonwebtoken.Claims claims = extractAllClaims(token);
             return claimsResolver.apply(claims);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new RuntimeException("Token expiré");
+        } catch (io.jsonwebtoken.JwtException e) {
+            throw new RuntimeException("Token invalide");
         } catch (Exception e) {
-           throw new RuntimeException("Erreur lors de l'extraction des claims, jetons invalide ou expiré" + e.getMessage());
+            throw new RuntimeException("Erreur lors de l'extraction des claims : " + e.getMessage());
         }
     }
 

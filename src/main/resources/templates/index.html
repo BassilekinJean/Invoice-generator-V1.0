@@ -178,6 +178,9 @@
             window.location.href = '/api/v1/login';
             return;
         }
+        // Gérer la vérification et l'affichage du message de profil
+        checkProfileStatus(token);
+
         // Configuration de l'affichage du menu
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
@@ -189,9 +192,6 @@
         sidebarClose.addEventListener('click', () => {
             sidebar.classList.add('-translate-x-full');
         });
-
-        // Gérer la vérification et l'affichage du message de profil
-        checkProfileStatus(token);
 
         const addItemButton = document.getElementById('addItem');
         const itemsContainer = document.getElementById('itemsContainer');
@@ -222,6 +222,8 @@
                     if (response.ok) {
                         localStorage.removeItem('jwtToken'); // Supprime le token du stockage local
                         window.location.href = '/api/v1/login'; // Redirige vers la page de connexion
+                    } else if (response.status == 401) {
+                        handleUnauthorized();
                     } else {
                         console.error('Échec de la déconnexion côté serveur');
                         alert('Échec de la déconnexion.');
@@ -322,9 +324,7 @@
                     
                     afficherMessage('Devis généré avec succès !', 'green');
                 } else if (response.status === 401) {
-                    afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
-                    localStorage.removeItem('jwtToken');
-                    window.location.href = '/api/v1/login';
+                    handleUnauthorized();
                 } else {
                     const errorData = await response.text();
                     globalError.querySelector('span').textContent = 'Erreur lors de la génération du PDF: ' + errorData;
@@ -423,9 +423,7 @@
                         document.getElementById('profileAlert').style.display = 'block';
                     }
                 } else if (response.status === 401) {
-                    afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
-                    localStorage.removeItem('jwtToken');
-                    window.location.href = '/api/v1/login';
+                    handleUnauthorized();
                 }
             } catch (error) {
                 console.error('Erreur lors de la vérification du profil:', error);
@@ -444,6 +442,12 @@
             setTimeout(() => {
                 alertDiv.remove();
             }, 3000);
+        }
+
+        function handleUnauthorized() {
+            localStorage.removeItem('jwtToken');
+            afficherMessage('Session expirée. Veuillez vous reconnecter.', 'red');
+            window.location.href = '/api/v1/login';
         }
     });
     </script>

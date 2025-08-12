@@ -52,7 +52,15 @@ public class JwtFilter extends OncePerRequestFilter{
             return;
         }
 
-        String username = jwTutils.extractUsername(token);
+        String username = null;
+        try {
+            username = jwTutils.extractUsername(token);
+        } catch (RuntimeException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Token expiré ou invalide\"}");
+            return;
+        }
 
         // On vérifie que le token est valide et que l'utilisateur n'est pas déjà authentifié
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -67,18 +75,23 @@ public class JwtFilter extends OncePerRequestFilter{
             UserDetails userDetails = userDetailService.loadUserByUsername(username); 
 
             // Si le token est valide et non expiré
-            if (jwTutils.validateToken(token, userDetails) && !jwTutils.isTokenExpired(token)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, 
-                    null,
-                    userDetails.getAuthorities() 
-                );
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                if (jwTutils.validateToken(token, userDetails) && !jwTutils.isTokenExpired(token)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, 
+                        null,
+                        userDetails.getAuthorities() 
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (RuntimeException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token expiré ou invalide\"}");
+                return;
             }
         }
-        
         // On continue la chaîne de filtres. Si le token n'était pas valide,
         // le contexte de sécurité est vide et l'AuthenticationEntryPoint sera déclenché.
         filterChain.doFilter(request, response);
