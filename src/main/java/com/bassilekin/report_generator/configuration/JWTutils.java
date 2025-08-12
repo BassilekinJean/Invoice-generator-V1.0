@@ -105,7 +105,7 @@ public class JWTutils {
             final io.jsonwebtoken.Claims claims = extractAllClaims(token);
             return claimsResolver.apply(claims);
         } catch (Exception e) {
-           throw new RuntimeException("Token invalide ou expiré" + e.getMessage());
+           throw new RuntimeException("Erreur lors de l'extraction des claims, jetons invalide ou expiré" + e.getMessage());
         }
     }
 
